@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار أساسيات بايثون</title>
+    <style>
+        :root {
+            --primary-color: #306998; /* أزرق بايثون */
+            --secondary-color: #FFE873; /* أصفر بايثون */
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-top: 5px solid var(--primary-color);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .question-block {
+            margin-bottom: 25px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border-right: 4px solid var(--secondary-color);
+        }
+
+        .question {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .answers label {
+            display: block;
+            margin-bottom: 8px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .answers label:hover {
+            background-color: #eef2f5;
+        }
+
+        input[type="radio"] {
+            margin-left: 10px;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #255277;
+        }
+
+        #results {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .correct { color: #28a745; }
+        .wrong { color: #dc3545; }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container">
+        <h1>اختبار كورس بايثون للمبتدئين 🐍</h1>
+        <p class="subtitle">المحاضرة الأولى: أساسيات البرمجة ومدخل إلى بايثون</p>
+        
+        <div id="quiz">
+            </div>
+
+        <button id="submit">عرض النتيجة</button>
+        <div id="results"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // مصفوفة الأسئلة المستخرجة من المحتوى
+            const myQuestions = [
+                {
+                    question: "ما هي لغة البرمجة؟",
+                    answers: {
+                        a: "برنامج لتعديل الصور والفيديوهات.",
+                        b: "وسيط بين الإنسان والحاسوب لكتابة تعليمات يفهمها وينفذها.",
+                        c: "قطعة من أجزاء الحاسوب الداخلية."
+                    },
+                    correctAnswer: "b"
+                },
+                {
+                    question: "ما هو الخيار الأهم الذي يجب تحديده أثناء تثبيت لغة بايثون؟",
+                    answers: {
+                        a: "Add Python to PATH",
+                        b: "Install VS Code",
+                        c: "Download Extensions"
+                    },
+                    correctAnswer: "a"
+                },
+                {
+                    question: "ما هو الفرق بين البيانات (Data) والمعلومات (Information)؟",
+                    answers: {
+                        a: "لا يوجد فرق، كلاهما نفس الشيء.",
+                        b: "المعلومات هي حقائق أولية خام، والبيانات هي التي تمت معالجتها.",
+                        c: "البيانات حقائق أولية خام، والمعلومات هي بيانات تمت معالجتها لتصبح ذات معنى."
+                    },
+                    correctAnswer: "c"
+                },
+                {
+                    question: "لإنشاء متغير يخزن قيمة منطقية (صح أو خطأ)، نستخدم نوع البيانات:",
+                    answers: {
+                        a: "Integer (int)",
+                        b: "Boolean (bool)",
+                        c: "String (str)"
+                    },
+                    correctAnswer: "b"
+                },
+                {
+                    question: "ما هي الدالة المستخدمة لطلب إدخال بيانات من المستخدم؟",
+                    answers: {
+                        a: "print()",
+                        b: "type()",
+                        c: "input()"
+                    },
+                    correctAnswer: "c"
+                }
+            ];
+
+            // دالة لبناء الاختبار وعرض الأسئلة
+            function buildQuiz() {
+                const output = [];
+
+                $.each(myQuestions, function(questionNumber, currentQuestion) {
+                    const answers = [];
+
+                    // إنشاء خيارات الإجابة
+                    for (let letter in currentQuestion.answers) {
+                        answers.push(
+                            `<label>
+                                <input type="radio" name="question${questionNumber}" value="${letter}">
+                                ${letter}: ${currentQuestion.answers[letter]}
+                            </label>`
+                        );
+                    }
+
+                    // إضافة السؤال وخياراته إلى المخرجات
+                    output.push(
+                        `<div class="question-block">
+                            <div class="question">${questionNumber + 1}. ${currentQuestion.question}</div>
+                            <div class="answers">${answers.join('')}</div>
+                        </div>`
+                    );
+                });
+
+                // دمج المخرجات وعرضها في الصفحة
+                $('#quiz').html(output.join(''));
+            }
+
+            // دالة لحساب وعرض النتائج
+            function showResults() {
+                let numCorrect = 0;
+
+                // التحقق من كل سؤال
+                $.each(myQuestions, function(questionNumber, currentQuestion) {
+                    const selectedAnswer = $(`input[name=question${questionNumber}]:checked`).val();
+
+                    if (selectedAnswer === currentQuestion.correctAnswer) {
+                        numCorrect++;
+                        // تلوين الإجابة الصحيحة
+                        $(`input[name=question${questionNumber}]:checked`).parent().css('color', 'green');
+                    } else {
+                        // تلوين الإجابة الخاطئة
+                        $(`input[name=question${questionNumber}]:checked`).parent().css('color', 'red');
+                    }
+                });
+
+                // عرض النتيجة النهائية
+                const resultDiv = $('#results');
+                resultDiv.show();
+                
+                if(numCorrect === myQuestions.length) {
+                    resultDiv.html(`<span class="correct">ممتاز! لقد أجبت على ${numCorrect} من أصل ${myQuestions.length} إجابات صحيحة. 🎉</span>`);
+                    resultDiv.css({'background-color': '#d4edda', 'border': '1px solid #c3e6cb'});
+                } else {
+                    resultDiv.html(`النتيجة: ${numCorrect} من ${myQuestions.length}. حاول مراجعة المحاضرة مرة أخرى!`);
+                    resultDiv.css({'background-color': '#fff3cd', 'border': '1px solid #ffeeba'});
+                }
+                
+                // تعطيل الزر بعد التسليم
+                $('#submit').prop('disabled', true).text('تم تسليم الإجابات');
+            }
+
+            // استدعاء دالة البناء عند تحميل الصفحة
+            buildQuiz();
+
+            // ربط دالة النتيجة بزر الإرسال
+            $('#submit').on('click', showResults);
+        });
+    </script>
+</body>
+</html>
