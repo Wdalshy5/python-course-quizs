@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فهرس كورس بايثون للمبتدئين 🐍</title>
+    <style>
+        :root {
+            --primary-color: #306998;
+            --secondary-color: #FFE873;
+            --dark-blue: #2b5b84;
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            border-bottom: 5px solid var(--secondary-color);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .lessons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .lesson-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-right: 5px solid #ccc;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* ستيل الدروس المتاحة */
+        .lesson-card.available {
+            border-right-color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .lesson-card.available:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(48, 105, 152, 0.2);
+        }
+
+        /* ستيل الدروس القادمة */
+        .lesson-card.coming-soon {
+            opacity: 0.6;
+            background-color: #f1f3f5;
+            border-right-color: #adb5bd;
+        }
+
+        .lesson-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.25rem;
+            color: #222;
+        }
+
+        .lesson-card.available h3 {
+            color: var(--dark-blue);
+        }
+
+        .lesson-card p {
+            margin: 0 0 20px 0;
+            font-size: 0.95rem;
+            color: #666;
+            flex-grow: 1;
+        }
+
+        .badge {
+            align-self: flex-start;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .badge.available-badge {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .badge.soon-badge {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+
+        /* تأثير التنبيه البسيط عند الضغط على درس غير متاح */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>كورس بايثون للمبتدئين 🐍</h1>
+        <p>المقدم: محمد الشيخ موسى | جدول المحاضرات والمسار التعليمي</p>
+    </header>
+
+    <div class="container">
+        <div class="lessons-grid" id="lessonsContainer">
+            </div>
+    </div>
+
+    <div class="toast" id="toastMessage">هذه المحاضرة ستكون متاحة قريباً جداً! 🚀</div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // تعريف بيانات الـ 15 محاضرة
+            const lessons = [
+                { id: 1, title: "المحاضرة 1: أساسيات البرمجة", desc: "مدخل إلى لغة بايثون، تثبيت الأدوات، البيانات والمتغيرات والإدخال والإخراج.", url: "lesson1.html", isAvailable: true },
+                { id: 2, title: "المحاضرة 2: القوائم والشروط", desc: "التعامل مع القوائم (Lists)، الشروط (If-statements) وجمل التكرار (Loops).", url: "#", isAvailable: false },
+                // بقية المحاضرات سيتم توليد بياناتها تلقائياً في الحلقة أدناه
+            ];
+
+            // تكملة بقية الـ 15 محاضرة ببيانات افتراضية
+            for (let i = 3; i <= 15; i++) {
+                lessons.push({
+                    id: i,
+                    title: `المحاضرة ${i}: قريباً`,
+                    desc: "محتوى متقدم سيتم إضافته فور تجهيز الشرح والتطبيقات الخاصة به.",
+                    url: "#",
+                    isAvailable: false
+                });
+            }
+
+            // توليد كود HTML لكل بطاقة وضخها في الحاوية
+            $.each(lessons, function(index, lesson) {
+                let cardClass = lesson.isAvailable ? "available" : "coming-soon";
+                let badge = lesson.isAvailable ? 
+                    '<span class="badge available-badge">متاح الآن ✨</span>' : 
+                    '<span class="badge soon-badge">قريباً جداً 🚀</span>';
+                
+                let cardHtml = `
+                    <a href="${lesson.url}" class="lesson-card ${cardClass}" data-available="${lesson.isAvailable}">
+                        <div>
+                            <h3>${lesson.title}</h3>
+                            <p>${lesson.desc}</p>
+                        </div>
+                        ${badge}
+                    </a>
+                `;
+                $('#lessonsContainer').append(cardHtml);
+            });
+
+            // التعامل مع الضغط على الكروت غير المتاحة
+            $(document).on('click', '.lesson-card.coming-soon', function(e) {
+                e.preventDefault(); // منع الانتقال لأي مكان
+                
+                // إظهار التنبيه واختفائه بسلاسة
+                $('#toastMessage').fadeIn(400).delay(2000).fadeOut(400);
+            });
+        });
+    </script>
+</body>
+</html>
